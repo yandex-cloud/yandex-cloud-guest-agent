@@ -1,3 +1,5 @@
+# Please note that the code below is modified by YANDEX LLC
+
 ENVVAR=CGO_ENABLED=0
 GOOS?=linux
 GOARCH?=amd64

@@ -1,3 +1,5 @@
+// Please note that the code below is modified by YANDEX LLC
+
 // Copyright 2019 Google LLC
 
 // Licensed under the Apache License, Version 2.0 (the "License");
