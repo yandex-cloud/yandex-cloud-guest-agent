@@ -1,3 +1,5 @@
+// Please note that the code below is modified by YANDEX LLC
+
 // Copyright 2022 Google LLC
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +26,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -171,6 +174,27 @@ func WriteFile(content []byte, outputFile string, perm fs.FileMode) error {
 	return os.WriteFile(outputFile, content, perm)
 }
 
+func AppendFile(content []byte, outputFile string) error {
+	f, err := os.OpenFile(outputFile, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if _, err = f.Write(content); err != nil {
+		return err
+	}
+	return nil
+}
+
+func ReadTextFile(inputFile string) (string, error) {
+	content, err := os.ReadFile(inputFile)
+	if err != nil {
+		return "", err
+	}
+	return string(content), nil
+}
+
 // SaferWriteFile writes to a temporary file and then replaces the expected output file.
 // This prevents other processes from reading partial content while the writer is still writing.
 func SaferWriteFile(content []byte, outputFile string, perm fs.FileMode) error {
@@ -217,4 +241,28 @@ func CopyFile(src, dst string, perm fs.FileMode) error {
 	}
 
 	return nil
+}
+
+// SortedEqual returns true if two string slices are equal, slices are sorted before checking equality, false
+// Does not modify the slices.
+func SortedEqual(first, second []string) bool {
+	if len(first) != len(second) {
+		return false
+	}
+
+	first_copy := make([]string, len(first))
+	second_copy := make([]string, len(second))
+
+	copy(first_copy, first)
+	copy(second_copy, second)
+
+	sort.Strings(first_copy)
+	sort.Strings(second_copy)
+
+	for idx := range first_copy {
+		if first_copy[idx] != second_copy[idx] {
+			return false
+		}
+	}
+	return true
 }

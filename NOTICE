@@ -3,8 +3,19 @@ Please note that changes have been made to the files:
  - Makefile
  - google_guest_agent/instance_setup.go
  - google_guest_agent/main.go
+ - google_guest_agent/cloud_init_accounts.go
+ - google_guest_agent/cloud_init_accounts_test.go
+ - google_guest_agent/non_windows_accounts.go
+ - google_guest_agent/oslogin.go
+ - google_guest_agent/time_clock.go
+ - google_guest_agent/time_clock_test.go
  - build_google_guest_agent.sh
  - metadata/metadata.go
+ - metadata/metadata_test.go
+ - metadata/user_data.go
+ - utils/main.go
+ - utils/go.mod
+ - utils/go.sum
  
 The copyright for the changes belongs to YANDEX LLC
 Copyright 2023 YANDEX LLC

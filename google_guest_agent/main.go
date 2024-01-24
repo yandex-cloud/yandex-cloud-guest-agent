@@ -102,6 +102,7 @@ func availableManagers() []manager {
 		&clockskewMgr{},
 		&osloginMgr{},
 		&accountsMgr{},
+		&cloudInitAccountsMgr{},
 	)
 }
 

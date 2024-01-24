@@ -1,3 +1,5 @@
+// Please note that the code below is modified by YANDEX LLC
+
 // Copyright 2019 Google LLC
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -415,6 +417,11 @@ func createSudoersGroup(ctx context.Context, config *cfg.Sections) error {
 func updateAuthorizedKeysFile(ctx context.Context, user string, keys []string) error {
 	gcomment := "# Added by Google"
 
+	keysSet := map[string]bool{}
+	for _, key := range keys {
+		keysSet[key] = true
+	}
+
 	passwd, err := getPasswd(user)
 	if err != nil {
 		return err
@@ -467,7 +474,10 @@ func updateAuthorizedKeysFile(ctx context.Context, user string, keys []string) e
 			isgoogle = true
 			continue
 		}
-		userKeys = append(userKeys, key)
+		// skip keys that are in the new metadata
+		if !keysSet[key] {
+			userKeys = append(userKeys, key)
+		}
 	}
 
 	newfile, err := os.OpenFile(tempPath, os.O_WRONLY|os.O_CREATE, 0600)
@@ -479,7 +489,7 @@ func updateAuthorizedKeysFile(ctx context.Context, user string, keys []string) e
 	for _, key := range userKeys {
 		fmt.Fprintf(newfile, "%s\n", key)
 	}
-	for _, key := range keys {
+	for key := range keysSet {
 		fmt.Fprintf(newfile, "%s\n%s\n", gcomment, key)
 	}
 	err = os.Chown(tempPath, passwd.UID, passwd.GID)
