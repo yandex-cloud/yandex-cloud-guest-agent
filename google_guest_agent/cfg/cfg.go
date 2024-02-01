@@ -1,3 +1,5 @@
+// Please note that the code below is modified by YANDEX LLC
+
 //  Copyright 2023 Google Inc. All Rights Reserved.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -89,7 +91,7 @@ ip_forwarding = true
 setup = true
 
 [OSLogin]
-cert_authentication = true
+cert_authentication = false
 
 [MDS]
 mtls_bootstrapping_enabled = true
