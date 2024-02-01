@@ -1,3 +1,4 @@
+// Please note that the code below is modified by YANDEX LLC
 module github.com/GoogleCloudPlatform/guest-agent
 
 go 1.20
@@ -21,6 +22,7 @@ require (
 	golang.org/x/sys v0.11.0
 	google.golang.org/grpc v1.57.0
 	google.golang.org/protobuf v1.31.0
+	gopkg.in/yaml.v3 v3.0.1
 	software.sslmate.com/src/go-pkcs12 v0.2.1
 )
 

@@ -177,6 +177,7 @@ type Attributes struct {
 	WSFCAddresses         string
 	WSFCAgentPort         string
 	DisableTelemetry      bool
+	UserData              UserData
 }
 
 // UnmarshalJSON unmarshals b into Attribute.
@@ -204,6 +205,7 @@ func (a *Attributes) UnmarshalJSON(b []byte) error {
 		WSFCAddresses         string      `json:"wsfc-addrs"`
 		WSFCAgentPort         string      `json:"wsfc-agent-port"`
 		DisableTelemetry      string      `json:"disable-guest-telemetry"`
+		UserData              UserData    `json:"user-data"`
 	}
 	var temp inner
 	if err := json.Unmarshal(b, &temp); err != nil {
@@ -213,6 +215,7 @@ func (a *Attributes) UnmarshalJSON(b []byte) error {
 	a.WSFCAddresses = temp.WSFCAddresses
 	a.WSFCAgentPort = temp.WSFCAgentPort
 	a.WindowsKeys = temp.WindowsKeys
+	a.UserData = temp.UserData
 
 	value, err := strconv.ParseBool(temp.BlockProjectKeys)
 	if err == nil {
@@ -262,6 +265,19 @@ func (a *Attributes) UnmarshalJSON(b []byte) error {
 		a.BlockProjectKeys = true
 		a.SSHKeys = append(a.SSHKeys, strings.Split(temp.OldSSHKeys, "\n")...)
 	}
+	// append ssh-keys from user-data (cloud-init)
+	if temp.UserData != nil && len(temp.UserData) > 0 {
+		for _, user := range temp.UserData {
+			if user.SshKeys == nil || len(user.SshKeys) == 0 {
+				continue
+			}
+
+			for _, sshKey := range user.SshKeys {
+				a.SSHKeys = append(a.SSHKeys, fmt.Sprintf("%s:%s", user.Name, sshKey))
+			}
+		}
+	}
+
 	return nil
 }
 

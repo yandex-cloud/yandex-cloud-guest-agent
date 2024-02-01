@@ -1,3 +1,5 @@
+// Please note that the code below is modified by YANDEX LLC
+
 // Copyright 2018 Google LLC
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -91,6 +93,18 @@ func TestBlockProjectKeys(t *testing.T) {
 		},
 		{
 			`{"instance": {"attributes": {"block-project-ssh-keys": "true", "ssh-keys": "name:ssh-rsa [KEY] hostname\nname:ssh-rsa [KEY] hostname"},"project": {"attributes": {"ssh-keys": "name:ssh-rsa [KEY] hostname\nname:ssh-rsa [KEY] hostname"}}}}`,
+			true,
+		},
+		{
+			`{"instance": {"attributes": {"user-data": "#cloud-config\ndatasource:\n test_src:\n  strict_id: false\nssh_pwauth: no\nusers:\n- snapuser: test@example.com\n- default\n- name: test-user\n  sudo: ALL=(ALL) NOPASSWD:ALL\n  shell: /bin/bash\n  ssh_authorized_keys:\n  - keydata\nruncmd: []\n", "block-project-ssh-keys": "true", "ssh-keys": "name:ssh-rsa [KEY] hostname\nname:ssh-rsa [KEY] hostname"},"project": {"attributes": {"ssh-keys": "name:ssh-rsa [KEY] hostname\nname:ssh-rsa [KEY] hostname"}}}}`,
+			true,
+		},
+		{
+			`{"instance": {"attributes": {"user-data": "#cloud-config\ndatasource:\n test_src:\n  strict_id: false\nssh_pwauth: no\nusers:\n- snapuser: test@example.com\n- default\n- name: test-user\n  sudo: \n    - ALL=(ALL) NOPASSWD:ALL\n  shell: /bin/bash\n  ssh_authorized_keys:\n  - keydata\nruncmd: []\n", "block-project-ssh-keys": "true", "ssh-keys": "name:ssh-rsa [KEY] hostname\nname:ssh-rsa [KEY] hostname"},"project": {"attributes": {"ssh-keys": "name:ssh-rsa [KEY] hostname\nname:ssh-rsa [KEY] hostname"}}}}`,
+			true,
+		},
+		{
+			`{"instance": {"attributes": {"user-data": "#cloud-config\ndatasource:\n test_src:\n  strict_id: false\nssh_pwauth: no\nusers:\n- snapuser: test@example.com\n- default\n- name: test-user\n  sudo: false\n  shell: /bin/bash\n  ssh_authorized_keys:\n  - keydata\nruncmd: []\n", "block-project-ssh-keys": "true", "ssh-keys": "name:ssh-rsa [KEY] hostname\nname:ssh-rsa [KEY] hostname"},"project": {"attributes": {"ssh-keys": "name:ssh-rsa [KEY] hostname\nname:ssh-rsa [KEY] hostname"}}}}`,
 			true,
 		},
 	}
