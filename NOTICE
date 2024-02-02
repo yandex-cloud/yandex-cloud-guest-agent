@@ -1,6 +1,7 @@
 Please note that changes have been made to the files: 
  - .gitignore
  - Makefile
+ - instance_configs.cfg
  - google_guest_agent/instance_setup.go
  - google_guest_agent/main.go
  - google_guest_agent/cloud_init_accounts.go
@@ -9,6 +10,8 @@ Please note that changes have been made to the files:
  - google_guest_agent/oslogin.go
  - google_guest_agent/time_clock.go
  - google_guest_agent/time_clock_test.go
+ - google_guest_agent/cfg/cfg.go
+ - google_guest_agent/events/events.go
  - build_google_guest_agent.sh
  - metadata/metadata.go
  - metadata/metadata_test.go
@@ -16,7 +19,7 @@ Please note that changes have been made to the files:
  - utils/main.go
  - utils/go.mod
  - utils/go.sum
- 
+
 The copyright for the changes belongs to YANDEX LLC
 Copyright 2023 YANDEX LLC
 Licensed under the Apache License, Version 2.0 (the "License");you may not use this file except in compliance with the License.You may obtain a copy of the License at

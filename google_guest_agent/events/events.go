@@ -1,3 +1,5 @@
+// Please note that the code below is modified by YANDEX LLC
+
 // Copyright 2023 Google LLC
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,6 +51,9 @@ type Watcher interface {
 // Manager defines the interface between events management layer and the
 // core guest agent implementation.
 type Manager struct {
+	// removeWaitGroup is used to wait until watcher cleanup is finished
+	removeWaitGroup sync.WaitGroup
+
 	// watcherEvents maps the registered watchers and their events.
 	watcherEvents []*WatcherEventType
 
@@ -189,6 +194,7 @@ func newManager() *Manager {
 		watchersMap:           make(map[string]bool),
 		removingWatcherEvents: make(map[string]bool),
 		subscribers:           make(map[string][]*eventSubscriber),
+		removeWaitGroup:       sync.WaitGroup{},
 		queue: &watcherQueue{
 			watchersMap:           make(map[string]bool),
 			dataBus:               make(chan eventBusData),
@@ -262,17 +268,28 @@ func (mngr *Manager) RemoveWatcher(ctx context.Context, watcher Watcher) error {
 	}
 
 	for _, curr := range mngr.watcherEvents {
-		if _, found := mngr.removingWatcherEvents[curr.evType]; found {
-			logger.Debugf("Watcher(%s) is being removed, skipping removal request: %s", id, curr.evType)
-			continue
-		}
-
 		if curr.watcher.ID() == id {
 			mngr.removingWatcherEvents[curr.evType] = true
 			logger.Debugf("Removing watcher: %s, event type: %s", id, curr.evType)
+			mngr.removeWaitGroup.Add(1)
 			curr.removed <- true
 		}
 	}
+
+	mngr.removeWaitGroup.Wait()
+
+	tempWatcherEvents := mngr.watcherEvents[:0]
+	for _, curr := range mngr.watcherEvents {
+		if curr.watcher.ID() != id {
+			tempWatcherEvents = append(tempWatcherEvents, curr)
+		}
+	}
+
+	mngr.watcherEvents = tempWatcherEvents
+
+	delete(mngr.watchersMap, id)
+
+	logger.Debugf("Removing watcher: %s completed", id)
 
 	return nil
 }
@@ -357,6 +374,7 @@ func (mngr *Manager) runWatcher(ctx context.Context, watcher Watcher, evType str
 
 	logger.Debugf("watcher finishing: %s", evType)
 	if !abort {
+		mngr.removeWaitGroup.Add(1)
 		removed <- true
 	}
 
@@ -463,7 +481,7 @@ func (mngr *Manager) Run(ctx context.Context) error {
 		for len := queue.length(); len > 0; {
 			doneStr := <-queue.watcherDone
 			len = queue.del(doneStr)
-			delete(mngr.removingWatcherEvents, doneStr)
+			mngr.removeWaitGroup.Done()
 			if !queue.leaving && len == 0 {
 				logger.Debugf("All watchers are finished, signaling to leave.")
 				queue.finishContextHandler <- true
