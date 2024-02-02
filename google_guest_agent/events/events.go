@@ -63,9 +63,6 @@ type Manager struct {
 	// watchersMutex protects the watchers map.
 	watchersMutex sync.Mutex
 
-	// removingWatcherEvents is a map of watchers being removed.
-	removingWatcherEvents map[string]bool
-
 	// running is a flag indicating if the Run() was previously called.
 	running bool
 
@@ -191,10 +188,9 @@ func (mngr *Manager) AddDefaultWatchers(ctx context.Context) error {
 // newManager allocates and initializes a events Manager.
 func newManager() *Manager {
 	return &Manager{
-		watchersMap:           make(map[string]bool),
-		removingWatcherEvents: make(map[string]bool),
-		subscribers:           make(map[string][]*eventSubscriber),
-		removeWaitGroup:       sync.WaitGroup{},
+		watchersMap:     make(map[string]bool),
+		subscribers:     make(map[string][]*eventSubscriber),
+		removeWaitGroup: sync.WaitGroup{},
 		queue: &watcherQueue{
 			watchersMap:           make(map[string]bool),
 			dataBus:               make(chan eventBusData),
@@ -269,7 +265,6 @@ func (mngr *Manager) RemoveWatcher(ctx context.Context, watcher Watcher) error {
 
 	for _, curr := range mngr.watcherEvents {
 		if curr.watcher.ID() == id {
-			mngr.removingWatcherEvents[curr.evType] = true
 			logger.Debugf("Removing watcher: %s, event type: %s", id, curr.evType)
 			mngr.removeWaitGroup.Add(1)
 			curr.removed <- true
