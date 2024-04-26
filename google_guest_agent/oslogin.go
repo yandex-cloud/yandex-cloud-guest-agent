@@ -122,7 +122,6 @@ func (o *osloginMgr) Set(ctx context.Context) error {
 		logger.Infof("Enabling OS Login")
 		newMetadata.Instance.Attributes.SSHKeys = nil
 		newMetadata.Project.Attributes.SSHKeys = nil
-		newMetadata.Instance.Attributes.UserData = nil
 		(&accountsMgr{}).Set(ctx)
 		(&cloudInitAccountsMgr{}).Set(ctx)
 	}
