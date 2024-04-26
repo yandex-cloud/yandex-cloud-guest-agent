@@ -92,6 +92,7 @@ func agentInit(ctx context.Context) {
 	//  - Set scheduler values.
 	//  - Run `google_optimize_local_ssd` script.
 	//  - Run `google_set_multiqueue` script.
+	//  - Wait for cloud init to complete
 	// TODO incorporate these scripts into the agent. liamh@12-11-19
 	config := cfg.Get()
 
@@ -108,6 +109,13 @@ func agentInit(ctx context.Context) {
 		// Linux instance setup.
 		defer run.Quiet(ctx, "systemd-notify", "--ready")
 		defer logger.Debugf("notify systemd")
+
+		// Wait for cloud init to complete before initializing guest agent
+		if err := run.Quiet(ctx, "cloud-init", "status", "--wait"); err != nil {
+			logger.Infof("Cloud init failed or isn't available: %v", err)
+		} else {
+			logger.Infof("Cloud init complete")
+		}
 
 		if config.Snapshots.Enabled {
 			logger.Infof("Snapshot listener enabled")

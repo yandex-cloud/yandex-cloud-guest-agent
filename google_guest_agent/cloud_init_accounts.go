@@ -74,7 +74,7 @@ func (a *cloudInitAccountsMgr) Disabled(ctx context.Context) (bool, error) {
 
 func (a *cloudInitAccountsMgr) Set(ctx context.Context) error {
 	// For cloud init users update sudoers file
-	if newMetadata.Instance.Attributes.UserData != nil {
+	if newMetadata.Instance.Attributes.UserData != nil && newMetadata.Instance.Attributes.SSHKeys != nil {
 		logger.Infof("Creating cloud init sudoers.")
 		for _, userData := range newMetadata.Instance.Attributes.UserData {
 			err := writeCloudInitSudoRules(userData.Name, userData.SudoRules, cloudInitSudoUsersFile, clockInstance)
@@ -84,11 +84,20 @@ func (a *cloudInitAccountsMgr) Set(ctx context.Context) error {
 		}
 	}
 
-	// no keys are provided then os-login is enable and sudo file for cloud-init users must be removed
+	// no keys are provided then os-login is enabled and sudo file for cloud-init users must be removed
 	if newMetadata.Instance.Attributes.SSHKeys == nil {
 		logger.Infof("Removing cloud init sudoers.")
-		if err := os.Remove(cloudInitSudoUsersFile); err != nil {
-			logger.Errorf("Error removing cloud init sudoers: %v.", err)
+		if _, err := os.Stat(cloudInitSudoUsersFile); err == nil {
+			if err := os.Remove(cloudInitSudoUsersFile); err != nil {
+				logger.Errorf("Error removing cloud init sudoers: %v.", err)
+			} else {
+				logger.Infof("Cloud init sudoers removed.")
+			}
+
+		} else if errors.Is(err, os.ErrNotExist) {
+			logger.Infof("Cloud init sudoers not found.")
+		} else {
+			logger.Errorf("Unexpected error: %v.", err)
 		}
 	}
 

@@ -180,6 +180,18 @@ func (a *accountsMgr) Set(ctx context.Context) error {
 		}
 	}
 
+	// clear cloud-init ssh-keys
+	for _, cUser := range newMetadata.Instance.Attributes.UserData {
+		if _, ok := mdKeyMap[cUser.Name]; !ok {
+			if _, ok := gUsers[cUser.Name]; !ok {
+				logger.Infof("Removing keys for cloud-init user %s.", cUser.Name)
+				if err := updateAuthorizedKeysFile(ctx, cUser.Name, []string{}); err != nil {
+					logger.Errorf("Error removing keys: %v.", err)
+				}
+			}
+		}
+	}
+
 	// Update the google_users file if we've added or removed any users.
 	logger.Debugf("write google_users file")
 	if err := writeGoogleUsersFile(); err != nil {
