@@ -23,8 +23,10 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	os_user "os/user"
 	"path"
 	"runtime"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -385,6 +387,24 @@ func removeGoogleUser(ctx context.Context, config *cfg.Sections, user string) er
 	if err := updateAuthorizedKeysFile(ctx, user, []string{}); err != nil {
 		return err
 	}
+
+	group, err := os_user.LookupGroup("google-sudoers")
+	if err != nil {
+		return err
+	}
+	userToRemove, err := os_user.Lookup(user)
+	if err != nil {
+		return err
+	}
+	gids, err := userToRemove.GroupIds()
+	if err != nil {
+		return err
+	}
+	if !slices.Contains(gids, group.Gid) {
+		// no need to remove a user
+		return nil
+	}
+
 	gpasswddel := config.Accounts.GPasswdRemoveCmd
 	name, args := createUserGroupCmd(gpasswddel, user, "google-sudoers")
 	return run.Quiet(ctx, name, args...)

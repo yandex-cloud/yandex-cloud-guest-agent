@@ -77,6 +77,29 @@ func addMetadataRoute() error {
 	return addIPForwardEntry(forwardEntry)
 }
 
+func waitForCloudInit(ctx context.Context) {
+	if runtime.GOOS == "windows" {
+		return
+	}
+
+	// Wait for cloud init to complete before initializing oslogin
+	logger.Infof("Waiting for cloud init to complete")
+	var res *run.Result
+	for i := 0; i < 4; i++ {
+		res = run.WithOutput(ctx, "cloud-init", "status", "--wait")
+		if res.ExitCode != 2 {
+			break
+		}
+
+		logger.Infof("Cloud init failed with an exit code 2. Error: %v Retrying...", res)
+	}
+	if res.ExitCode != 0 {
+		logger.Errorf("Cloud init failed with an exit code: %d, error: %v", res.ExitCode, res.Error())
+	} else {
+		logger.Infof("Cloud init finished")
+	}
+}
+
 func agentInit(ctx context.Context) {
 	// Actions to take on agent startup.
 	//
@@ -109,13 +132,6 @@ func agentInit(ctx context.Context) {
 		// Linux instance setup.
 		defer run.Quiet(ctx, "systemd-notify", "--ready")
 		defer logger.Debugf("notify systemd")
-
-		// Wait for cloud init to complete before initializing guest agent
-		if err := run.Quiet(ctx, "cloud-init", "status", "--wait"); err != nil {
-			logger.Infof("Cloud init failed or isn't available: %v", err)
-		} else {
-			logger.Infof("Cloud init complete")
-		}
 
 		if config.Snapshots.Enabled {
 			logger.Infof("Snapshot listener enabled")

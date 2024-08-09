@@ -82,7 +82,7 @@ func (s *User) UnmarshalYAML(unmarshal func(interface{}) error) error {
 				logger.Errorf("Cannot parse cloud-init sudo rule for user %s.", tempUser.Name)
 			}
 		}
-	} else if _, ok := tempUser.SudoRules.(bool); !ok {
+	} else if _, ok := tempUser.SudoRules.(bool); tempUser.SudoRules != nil && !ok {
 		logger.Errorf("Cannot parse sudo rules")
 	}
 

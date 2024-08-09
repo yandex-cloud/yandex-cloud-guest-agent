@@ -12,6 +12,8 @@ Please note that changes have been made to the files:
  - google_guest_agent/time_clock_test.go
  - google_guest_agent/cfg/cfg.go
  - google_guest_agent/events/events.go
+ - google_guest_agent/osinfo/osinfo_unix.go
+ - google_guest_agent/osinfo/osinfo_unix_test.go
  - build_google_guest_agent.sh
  - metadata/metadata.go
  - metadata/metadata_test.go

@@ -180,6 +180,7 @@ func runAgent(ctx context.Context) {
 	mdsClient = metadata.New()
 
 	agentInit(ctx)
+	waitForCloudInit(ctx)
 
 	// Previous request to metadata *may* not have worked becasue routes don't get added until agentInit.
 	var err error
