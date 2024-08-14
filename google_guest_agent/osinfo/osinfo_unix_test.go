@@ -1,3 +1,5 @@
+// Please note that the code below is modified by YANDEX LLC
+
 // Copyright 2023 Google LLC
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -58,6 +60,7 @@ func TestParseOSRelease(t *testing.T) {
 		{"sles 12.4", "ID=sles\nPRETTY_NAME=\"SLES\"\nVERSION=\"12-SP4\"\nVERSION_ID=\"12.4\"", OSInfo{OS: "sles", PrettyName: "SLES", VersionID: "12.4", Version: Ver{12, 4, 0, 2}}, false},
 		{"debian 9 (stretch)", "ID=debian\nPRETTY_NAME=\"Debian GNU/Linux\"\nVERSION=\"9 (stretch)\"\nVERSION_ID=\"9\"", OSInfo{OS: "debian", PrettyName: "Debian GNU/Linux", VersionID: "9", Version: Ver{9, 0, 0, 1}}, false},
 		{"debian 9", "ID=\"debian\"\nPRETTY_NAME=\"Debian GNU/Linux\"\nVERSION=9\nVERSION_ID=\"9\"", OSInfo{OS: "debian", VersionID: "9", PrettyName: "Debian GNU/Linux", Version: Ver{9, 0, 0, 1}}, false},
+		{"astra 1.7", "PRETTY_NAME=\"Astra Linux\"\nNAME=\"Astra Linux\"\nID=astra\nID_LIKE=debian\nANSI_COLOR=\"1;31\"\nHOME_URL=\"https://astralinux.ru\"\nSUPPORT_URL=\"https://astralinux.ru/support\"\nLOGO=astra\nVERSION_ID=1.7_x86-64\nVERSION_CODENAME=1.7_x86-64", OSInfo{OS: "astra", VersionID: "1.7_x86-64", PrettyName: "Astra Linux", Version: Ver{1, 7, 0, 2}}, false},
 		{"error version parsing", "ID=\"debian\"\nPRETTY_NAME=\"Debian GNU/Linux\"\nVERSION=9\nVERSION_ID=\"something\"", OSInfo{OS: "debian", PrettyName: "Debian GNU/Linux", VersionID: "something"}, true},
 	}
 	for _, tc := range tests {

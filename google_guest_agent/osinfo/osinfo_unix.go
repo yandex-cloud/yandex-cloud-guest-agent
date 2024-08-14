@@ -1,3 +1,5 @@
+// Please note that the code below is modified by YANDEX LLC
+
 // Copyright 2023 Google LLC
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -77,7 +79,11 @@ func parseSystemRelease(systemRelease string) (OSInfo, error) {
 }
 
 func parseVersion(version string) (Ver, error) {
-	versionparts := strings.Split(version, ".")
+	// remove platform info (e.g. _x86-64) from version
+	// some OS distributions include this information in the version string
+	normalizedVersion := strings.Split(version, "_")[0]
+
+	versionparts := strings.Split(normalizedVersion, ".")
 	ret := Ver{Length: len(versionparts)}
 
 	// Must have at least major version.

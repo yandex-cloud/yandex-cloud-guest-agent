@@ -71,6 +71,10 @@ func getOSLoginEnabled(md *metadata.Descriptor) (bool, bool, bool) {
 }
 
 func enableDisableOSLoginCertAuth(ctx context.Context) error {
+	if newMetadata == nil {
+		return nil
+	}
+
 	eventManager := events.Get()
 	osLoginEnabled, _, _ := getOSLoginEnabled(newMetadata)
 	if osLoginEnabled {

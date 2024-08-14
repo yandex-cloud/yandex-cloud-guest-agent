@@ -107,6 +107,10 @@ func TestBlockProjectKeys(t *testing.T) {
 			`{"instance": {"attributes": {"user-data": "#cloud-config\ndatasource:\n test_src:\n  strict_id: false\nssh_pwauth: no\nusers:\n- snapuser: test@example.com\n- default\n- name: test-user\n  sudo: false\n  shell: /bin/bash\n  ssh_authorized_keys:\n  - keydata\nruncmd: []\n", "block-project-ssh-keys": "true", "ssh-keys": "name:ssh-rsa [KEY] hostname\nname:ssh-rsa [KEY] hostname"},"project": {"attributes": {"ssh-keys": "name:ssh-rsa [KEY] hostname\nname:ssh-rsa [KEY] hostname"}}}}`,
 			true,
 		},
+		{
+			`{"instance": {"attributes": {"user-data": "#cloud-config\ndatasource:\n test_src:\n  strict_id: false\nssh_pwauth: no\nusers:\n- snapuser: test@example.com\n- default\n- name: test-user\n  shell: /bin/bash\n  ssh_authorized_keys:\n  - keydata\nruncmd: []\n", "block-project-ssh-keys": "true", "ssh-keys": "name:ssh-rsa [KEY] hostname\nname:ssh-rsa [KEY] hostname"},"project": {"attributes": {"ssh-keys": "name:ssh-rsa [KEY] hostname\nname:ssh-rsa [KEY] hostname"}}}}`,
+			true,
+		},
 	}
 	for _, test := range tests {
 		var md Descriptor
