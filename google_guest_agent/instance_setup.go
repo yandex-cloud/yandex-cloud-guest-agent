@@ -18,6 +18,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net"
 	"os"
@@ -34,6 +35,16 @@ import (
 	"github.com/GoogleCloudPlatform/guest-logging-go/logger"
 	"github.com/go-ini/ini"
 )
+
+const (
+	CloudInitWaitRetries = 4
+	// Cloud init wait retry delay in seconds
+	CloudInitWaitRetryDelay = 3
+)
+
+type CloudInitStatus struct {
+	Status string `json:"status"`
+}
 
 func getDefaultAdapter(fes []ipForwardEntry) (*ipForwardEntry, error) {
 	// Choose the first adapter index that has the default route setup.
@@ -85,18 +96,25 @@ func waitForCloudInit(ctx context.Context) {
 	// Wait for cloud init to complete before initializing oslogin
 	logger.Infof("Waiting for cloud init to complete")
 	var res *run.Result
-	for i := 0; i < 4; i++ {
-		res = run.WithOutput(ctx, "cloud-init", "status", "--wait")
-		if res.ExitCode != 2 {
-			break
+	for i := 0; i < CloudInitWaitRetries; i++ {
+		res = run.WithOutput(ctx, "cloud-init", "status", "--wait", "--format", "json")
+		if res.ExitCode == 2 || res.ExitCode == 0 {
+			var status CloudInitStatus
+			err := json.Unmarshal([]byte(res.StdOut), &status)
+			if err == nil && status.Status == "done" {
+				if res.ExitCode == 2 {
+					logger.Warningf("Cloud init status check returned with an exit code: 2. Check https://cloudinit.readthedocs.io/en/latest/explanation/return_codes.html for details")
+				}
+				logger.Infof("Cloud init initialization is finished")
+				return
+			}
 		}
 
-		logger.Infof("Cloud init failed with an exit code 2. Error: %v Retrying...", res)
+		logger.Infof("Cloud init status check failed. Error: %v. Retry will be executed after %d seconds", res.Error(), CloudInitWaitRetryDelay)
+		time.Sleep(CloudInitWaitRetryDelay * time.Second)
 	}
-	if res.ExitCode != 0 {
-		logger.Errorf("Cloud init failed with an exit code: %d, error: %v", res.ExitCode, res.Error())
-	} else {
-		logger.Infof("Cloud init finished")
+	if res.ExitCode != 0 && res.ExitCode != 2 {
+		logger.Errorf("Cloud init status check failed with an exit code: %d, error: %v, outut: %v", res.ExitCode, res.Error(), res.StdOut)
 	}
 }
 
