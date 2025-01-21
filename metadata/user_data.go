@@ -57,6 +57,7 @@ func (s *User) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		Name      string      `yaml:"name"`
 		Snapuser  string      `yaml:"snapuser"`
 		SshKeys   []string    `yaml:"ssh_authorized_keys"`
+		SshKeys2  []string    `yaml:"ssh-authorized-keys"` // older cloud-init versions support this attribute
 		SudoRules interface{} `yaml:"sudo"`
 	}
 	var tempUser innerUser
@@ -87,7 +88,11 @@ func (s *User) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	}
 
 	s.Name = tempUser.Name
-	s.SshKeys = tempUser.SshKeys
+	if tempUser.SshKeys != nil {
+		s.SshKeys = tempUser.SshKeys
+	} else {
+		s.SshKeys = tempUser.SshKeys2
+	}
 	s.SudoRules = sudoRules
 	return nil
 }
