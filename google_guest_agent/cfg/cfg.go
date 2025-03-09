@@ -55,13 +55,13 @@ userdel_cmd = userdel -r {user}
 
 [Daemons]
 accounts_daemon = true
-clock_skew_daemon = true
-network_daemon = true
+clock_skew_daemon = false
+network_daemon = false
 
 [IpForwarding]
 ethernet_proto_id = 66
-ip_aliases = true
-target_instance_ips = true
+ip_aliases = false
+target_instance_ips = false
 
 [Instance]
 instance_id =
@@ -70,11 +70,11 @@ instance_id_dir = /etc/google_instance_id
 [InstanceSetup]
 host_key_dir = /etc/ssh
 host_key_types = ecdsa,ed25519,rsa
-network_enabled = true
-optimize_local_ssd = true
-set_boto_config = true
-set_host_keys = true
-set_multiqueue = true
+network_enabled = false
+optimize_local_ssd = false
+set_boto_config = false
+set_host_keys = false
+set_multiqueue = false
 
 [MetadataScripts]
 default_shell = /bin/bash
@@ -87,8 +87,8 @@ sysprep-specialize = true
 
 [NetworkInterfaces]
 dhcp_command =
-ip_forwarding = true
-setup = true
+ip_forwarding = false
+setup = false
 
 [OSLogin]
 cert_authentication = false
@@ -101,6 +101,9 @@ enabled = false
 snapshot_service_ip = 169.254.169.254
 snapshot_service_port = 8081
 timeout_in_seconds = 60
+
+[OSLogin]
+cert_authentication = false
 
 [Unstable]
 `
